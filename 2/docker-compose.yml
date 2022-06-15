@@ -1,0 +1,10 @@
+services:
+  reverseproxy:
+    build:
+      context: ./reverseproxy
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+  whoami:
+    image: containous/whoami
+    hostname: whoami
