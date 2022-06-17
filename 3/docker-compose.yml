@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  certbot:
+    build:
+      context: ./cert
+      dockerfile: Dockerfile
+    volumes:
+      - ./cert/ovh/:/ovh:ro
+      - certs:/etc/letsencrypt
+  nginx:
+    image: nginx
+    hostname: nginx
+    volumes:
+      - ./site.conf:/etc/nginx/conf.d/site.conf
+      - ./nginx/site/html5up-story:/home/site:ro
+      - certs:/etc/letsencrypt:ro
+    networks:
+      - front
+      - back
+    ports:
+      - "80:80"
+      - "443:443"
+networks:
+  front:
+  back:
+
+volumes:
+  certs:
