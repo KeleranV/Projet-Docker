@@ -28,7 +28,7 @@ Ce dépot contient les ressources des quatres mini-projets réalisés par Léo V
 
 ![affichage ports](./ports_projet1.png)
 
-![démo_influxDB](./Script_Projet\t1.png)
+![démo_influxDB](./Script_Projet1.png)
 
 
 ## 2. DISPONIBILITE DE SERVICE
