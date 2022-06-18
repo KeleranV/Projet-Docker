@@ -26,6 +26,11 @@ Ce dépot contient les ressources des quatres mini-projets réalisés par Léo V
 
 ## 1. VISUALISATION DE DONNEES IOT – FASTAPI / INFLUXDB
 
+![affichage ports](./ports_projets1)
+
+![démo_influxDB](./Script_Projet1)
+
+
 ## 2. DISPONIBILITE DE SERVICE
 
 ![démo_rev_proxy](./test_mini_proj_2.png)
