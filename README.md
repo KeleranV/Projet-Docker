@@ -48,10 +48,32 @@ done
 
 ## 2. DISPONIBILITE DE SERVICE
 
+Ici l'idée est de mettre en évidence la disponibilité applicative en utilisant le reverse-proxy de Nginx. L’objectif est de créer un conteneur qui sera utilisé en frontal d’un ensemble de conteneurs, situé sur leur réseau propre, qui pourront être mis à l'échelle par Docker.
+On utilise Nginx (documentation: [Nginx](https://hub.docker.com/_/nginx)) pour gérer l’équilibrage de charge sur les conteneurs whoami (documentation: [Whoami](https://hub.docker.com/r/containous/whoami)).
+Pour la configuration du reverse proxy, le fichier de configuration de base de nginx situé dans /etc/nginx/conf.d à été écrasé par `nginx.conf`:
+
+```bash
+event{}
+http{server {
+   listen 80;
+   location / {
+      proxy_pass http://whoami;
+      proxy_set_header   Host             $host;
+      proxy_set_header   X-Real-IP        $remote_addr;
+      proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+   }
+}
+}
+```
+### Fonctionnement du projet
+
+Une fois la commande `docker-compose up` lancée, le port 80 du conteneur *nginx* est exposé et mappé sur le port 80 de la machine hôte, on peut donc joindre les conteneurs whoami en envoyant des requêtes à l'adresse <http://localhost>. Le fichier de configuration `nginx.conf` redirige ainsi toute requête reçu sur le port 80 aux conteneurs.
+
 ![démo_rev_proxy](./test_mini_proj_2.png)
 
 ## 3. HEBERGEMENT WEB (VERSION NGINX)
 
 ![affichage ports](./ports_projet1.png)
+![démo_Nginx](./Demo_projet_3.png)
 
 ## 4. HEBERGEMENT WEB (VERSION TRAEFIK)
