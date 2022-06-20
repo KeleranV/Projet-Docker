@@ -106,6 +106,8 @@ Ensuite à l'aide de la commande suivante, on génère les certificats : `certbo
 
 ![dockerCompose](./Dockercompose_3.png)
 
+Les ports 80 et 443 sont mappé pour http et https.
+
 Un volume *certs* est déclaré et est utilisé dans le conteneur *certbot* en le mappant sur l’arborescence du conteneur /etc/letsencrypt.
 Ce volume sera présenté aussi dans le conteneur nginx sur le même point de montage, mais en lecture seule.
 
@@ -126,3 +128,6 @@ Après requête à l'adresse `https://www.projet.keleranv.ovh`, le site s'affich
 ![démo_Nginx](./Demo_projet_3.png)
 
 ## 4. HEBERGEMENT WEB (VERSION TRAEFIK)
+
+ENLEVER LES NETWORKS!!
+SITE.CONF MAL MIS??? MODIFIER DOCKERCOMPOSE.YML???
