@@ -73,6 +73,29 @@ Une fois la commande `docker-compose up` lancée, le port 80 du conteneur *nginx
 
 ## 3. HEBERGEMENT WEB (VERSION NGINX)
 
+L'objectif de ce mini projet est de créer un service Docker permettant l’hébergement d’un site web avec Nginx. Le site ne sera pas présenté frontalement mais sera accessible à travers un service de proxy Nginx.
+Un certificat électronique sera automatiquement généré en utilisant l’API de l’hébergeur OVH. Pour réaliser ce projet, vous devez être propriétaire d’un nom de domaine OVH.
+Le certificat électronique sera généré par LetsEncrypt qui procèdera à une vérification de la possession du nom de domaine pour lequel vous demandez à créer un certificat. Nous paramètrerons l’utilitaire de génération de certificat certbot pour réaliser un challenge DNS auprès de LetsEncrypt.
+
+### Arborescence de travail
+
+Dans un dossier *Nginx* nous insérons un fichier de configuration du service `Dockerfile`, ainsi qu’un dossier `site`, prévu pour stocker l’arborescence du site web.
+Dans le `Dockerfile` le dossier de stockage sera dans */home/site* en lecture seule.
+
+![dockerFile](./Dockerfil_nginx_3.png)
+
+Le site web généré sera celui [HTML5Up](https://html5up.net/) dont nous avons placé l'archive dans `site`
+
+### Conteneur de service
+
+Dans un dossier *Cert* nous insérons un fichier de configuration du service `Dockerfile` avec les caractéristiques suivantes : 
+
+![dockerFileCert](./Dockerfile_cert_3.png)
+
+### Paramétrage de l'API OVH
+
+
+
 ![affichage ports](./ports_projet1.png)
 ![démo_Nginx](./Demo_projet_3.png)
 
