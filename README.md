@@ -28,6 +28,8 @@ Notre idée initiale était de créer deux images, une pour utiliser l'API *pyfl
 
 Pour des raisons de sécurité, aucune information confidentielle n'est renseignée dans ce fichier, nous utilisons à la place le fichier `.env` qui est par défaut chargé par docker-compose pour fixer les variables d'environnement.
 
+![env](./env_1.png)
+
 **N-B:** Dans le contexte pédagogique, le `.env` est présent sur le dépôt git, mais dans une situation de production, ce fichier ne doit pas être communiqué, étant donné qu'il sert à configurer un produit pour un client.
 
 ### Fonctionnement du projet
@@ -84,7 +86,7 @@ Dans le `Dockerfile` le dossier de stockage sera dans */home/site* en lecture se
 
 ![dockerFile](./Dockerfil_nginx_3.png)
 
-Le site web généré sera celui [HTML5Up](https://html5up.net/) dont nous avons placé l'archive dans `site`
+Le site web généré sera celui [HTML5Up](https://html5up.net/) dont nous avons placé l'archive dans `nginx/site`
 
 ### Conteneur de service
 
