@@ -100,7 +100,7 @@ Ensuite à l'aide de la commande suivante, on génère les certificats : `certbo
 
 ### Docker-compose.yml
 
-À la racine du projet, on créer un fichier *docker-compose.yml* où l'on déclare le docker *nginx* et *cerbot*.
+À la racine du projet, on créer un fichier *docker-compose.yml* où l'on déclare les conteneurs *nginx* et *cerbot*.
 
 ![dockerCompose](./Dockercompose_3.png)
 
@@ -115,7 +115,12 @@ Ce service est paramétré dans le fichier *nginx/site.conf*.
 
 ### Résultat
 
+On observe bien les ports d'écoute 80 & 443 du conteneur nginx.
+
 ![affichage ports](./ports_projet1.png)
+
+Après requête à l'adresse `https://www.projet.keleranv.ovh`, le site s'affiche.
+
 ![démo_Nginx](./Demo_projet_3.png)
 
 ## 4. HEBERGEMENT WEB (VERSION TRAEFIK)
