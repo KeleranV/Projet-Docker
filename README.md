@@ -94,7 +94,26 @@ Dans un dossier *Cert* nous insérons un fichier de configuration du service `Do
 
 ### Paramétrage de l'API OVH
 
+Apres avoir acheté un nom de domaine, il faut créer un token. Ce token doit posséder les droits *GET PUT DELETE POST*. Le tokent est stocké dans un fichier ovh.ini situé à l'interieur du dossier *cert*.
 
+Ensuite à l'aide de la commande suivante, on génère les certificats : `certbot certonly --dns-ovh --dns-ovh-credentials /ovh/.ovh.ini -d <fqdn>`
+
+### Docker-compose.yml
+
+À la racine du projet, on créer un fichier *docker-compose.yml* où l'on déclare le docker *nginx* et *cerbot*.
+
+![dockerCompose](./Dockercompose_3.png)
+
+Un volume *certs* est déclaré et est utilisé dans le conteneur *certbot* en le mappant sur l’arborescence du conteneur /etc/letsencrypt.
+Ce volume sera présenté aussi dans le conteneur nginx sur le même point de montage, mais en lecture seule.
+
+### Service HTTPS
+
+Ce service est paramétré dans le fichier *nginx/site.conf*.
+
+![site.conf](./site.conf_3.png)
+
+### Résultat
 
 ![affichage ports](./ports_projet1.png)
 ![démo_Nginx](./Demo_projet_3.png)
