@@ -13,7 +13,6 @@ Ce dépot contient les ressources des quatres mini-projets réalisés par Léo V
 ### Ressources Md
 
 - [Cheatsheet](https://www.markdownguide.org/cheat-sheet/)
-- [Style en plus (icones réseaux et tout)](https://yushi95.medium.com/how-to-create-a-beautiful-readme-for-your-github-profile-36957caa711c)
 
 ## Table des matières
 
@@ -67,11 +66,12 @@ http{server {
 }
 }
 ```
+
 ### Fonctionnement du projet
 
 Une fois la commande `docker-compose up` lancée, le port 80 du conteneur *nginx* est exposé et mappé sur le port 80 de la machine hôte, on peut donc joindre les conteneurs *whoami* en envoyant des requêtes à l'adresse <http://localhost>. Le fichier de configuration `nginx.conf` redirige ainsi toute requête reçu sur le port 80 aux conteneurs.
 
-![démo_rev_proxy](./test_mini_proj_2.png)
+![démo_rev_proxy](./images/test_mini_proj_2.png)
 
 ## 3. HEBERGEMENT WEB (VERSION NGINX)
 
@@ -84,15 +84,33 @@ Le certificat électronique sera généré par LetsEncrypt qui procèdera à une
 Dans un dossier *Nginx* nous insérons un fichier de configuration du service `Dockerfile`, ainsi qu’un dossier `site`, prévu pour stocker l’arborescence du site web.
 Dans le `Dockerfile` le dossier de stockage sera dans */home/site* en lecture seule.
 
-![dockerFile](./Dockerfil_nginx_3.png)
+```Dockerfile
+FROM alpine:latest
 
-Le site web généré sera celui [HTML5Up](https://html5up.net/) dont nous avons placé l'archive dans `nginx/site`
+RUN apk update
+RUN apk add nginx
+RUN apk add openrc
+
+RUN openrc
+RUN touch /run/openrc/softlevel
+
+RUN rc-update add nginx
+
+VOLUME /home/server-9/projets/3/nginx/site /home/site:ro
+
+RUN service nginx start
+
+EXPOSE 80/TCP
+ENTRYPOINT /bin/sh
+```
+
+Le site web généré sera un site issu de [HTML5Up](https://html5up.net/) dont nous avons placé l'archive dans `nginx/site`
 
 ### Conteneur de service
 
 Dans un dossier *Cert* nous insérons un fichier de configuration du service `Dockerfile` avec les caractéristiques suivantes : 
 
-![dockerFileCert](./Dockerfile_cert_3.png)
+![dockerFileCert](./images/Dockerfile_cert_3.png)
 
 ### Paramétrage de l'API OVH
 
@@ -104,7 +122,7 @@ Ensuite à l'aide de la commande suivante, on génère les certificats : `certbo
 
 À la racine du projet, on créer un fichier *docker-compose.yml* où l'on déclare les conteneurs *nginx* et *cerbot*.
 
-![dockerCompose](./Dockercompose_3.png)
+![dockerCompose](./images/Dockercompose_3.png)
 
 Les ports 80 et 443 sont mappé pour http et https.
 
@@ -115,17 +133,17 @@ Ce volume sera présenté aussi dans le conteneur nginx sur le même point de mo
 
 Ce service est paramétré dans le fichier *nginx/site.conf*.
 
-![site.conf](./site.conf_3.png)
+![site.conf](./images/site.conf_3.png)
 
 ### Résultat
 
 On observe bien les ports d'écoute 80 & 443 du conteneur nginx.
 
-![affichage ports](./ports_projet1.png)
+![affichage ports](./images/ports_projet1.png)
 
 Après requête à l'adresse `https://www.projet.keleranv.ovh`, le site s'affiche.
 
-![démo_Nginx](./Demo_projet_3.png)
+![démo_Nginx](./images/Demo_projet_3.png)
 
 ## 4. HEBERGEMENT WEB (VERSION TRAEFIK)
 
