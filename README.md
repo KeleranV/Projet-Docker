@@ -2,7 +2,6 @@
 
 Ce dépot contient les ressources des quatres mini-projets réalisés par Léo VANSIMAY et Gaël LECONTE dans le cadre du cours **Architecture Cloud et Méthodes DevOps, outils pour le Cloud-Gaming** pour le trimestre d'été 2022 à l'UQAC.
 
-
 ## TODO List
 
 - [x] Sujet 1
@@ -27,7 +26,14 @@ Notre idée initiale était de créer deux images, une pour utiliser l'API *pyfl
 
 Pour des raisons de sécurité, aucune information confidentielle n'est renseignée dans ce fichier, nous utilisons à la place le fichier `.env` qui est par défaut chargé par docker-compose pour fixer les variables d'environnement.
 
-![env](./env_1.png)
+```bash
+DOCKER_INFLUXDB_INIT_URL="http://influxpro:8086"
+DOCKER_INFLUXDB_INIT_ORG="my-org"
+DOCKER_INFLUXDB_INIT_BUCKET="my-bucket"
+DOCKER_INFLUXDB_INIT_ADMIN_TOKEN="my-token"
+DOCKER_INFLUXDB_INIT_USERNAME="my-user"
+DOCKER_INFLUXDB_INIT_PASSWORD="my-password"
+```
 
 **N-B:** Dans le contexte pédagogique, le `.env` est présent sur le dépôt git, mais dans une situation de production, ce fichier ne doit pas être communiqué, étant donné qu'il sert à configurer un produit pour un client.
 
@@ -45,7 +51,7 @@ do
 done
 ```
 
-![démo_influxDB](./Script_Projet1.png)
+![démo_influxDB](./images/Script_Projet1.png)
 
 ## 2. DISPONIBILITE DE SERVICE
 
@@ -108,9 +114,16 @@ Le site web généré sera un site issu de [HTML5Up](https://html5up.net/) dont 
 
 ### Conteneur de service
 
-Dans un dossier *Cert* nous insérons un fichier de configuration du service `Dockerfile` avec les caractéristiques suivantes : 
+Dans un dossier *Cert* nous insérons un fichier de configuration du service `Dockerfile` avec les caractéristiques suivantes :
 
-![dockerFileCert](./images/Dockerfile_cert_3.png)
+```Dockerfile
+FROM debian:latest
+
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install certbot python3-certbot-dns-ovh python3-certbot-nginx -y
+
+CMD [ "/bin/sh", "-c", "while true; do sleep 1; done" ]
+```
 
 ### Paramétrage de l'API OVH
 
@@ -122,7 +135,37 @@ Ensuite à l'aide de la commande suivante, on génère les certificats : `certbo
 
 À la racine du projet, on créer un fichier *docker-compose.yml* où l'on déclare les conteneurs *nginx* et *cerbot*.
 
-![dockerCompose](./images/Dockercompose_3.png)
+```yml
+version: "3.9"
+
+services:
+  certbot:
+    build:
+      context: ./cert
+      dockerfile: Dockerfile
+    volumes:
+      - ./cert/ovh/:/ovh:ro
+      - certs:/etc/letsencrypt
+  nginx:
+    image: nginx
+    hostname: nginx
+    volumes:
+      - ./site.conf:/etc/nginx/conf.d/site.conf
+      - ./nginx/site/html5up-story:/home/site:ro
+      - certs:/etc/letsencrypt:ro
+    networks:
+      - front
+      - back
+    ports:
+      - "80:80"
+      - "443:443"
+networks:
+  front:
+  back:
+
+volumes:
+  certs:
+```
 
 Les ports 80 et 443 sont mappé pour http et https.
 
@@ -133,7 +176,23 @@ Ce volume sera présenté aussi dans le conteneur nginx sur le même point de mo
 
 Ce service est paramétré dans le fichier *nginx/site.conf*.
 
-![site.conf](./images/site.conf_3.png)
+```bash
+server{
+ listen 80;
+ listen 443 ssl http2;
+ listen [::]:443 ssl http2;
+ server_name www.projet.keleranv.ovh;
+
+ # SSL
+ ssl_certificate /etc/letsencrypt/live/www.projet.keleranv.ovh/fullchain.pem;
+ ssl_certificate_key /etc/letsencrypt/live/www.projet.keleranv.ovh/privkey.pem;
+ ssl_trusted_certificate /etc/letsencrypt/live/www.projet.keleranv.ovh/chain.pem;
+ location / {
+  root /home/site;
+  }
+}
+
+```
 
 ### Résultat
 
