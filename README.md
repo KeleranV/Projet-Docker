@@ -24,7 +24,7 @@ Ce dépot contient les ressources des quatres mini-projets réalisés par Léo V
 
 Notre idée initiale était de créer deux images, une pour utiliser l'API *pyflux*, et l'autre pour lancer *InfluxDB* et le configurer automatiquement. Mais nous avons remarqué qu'une image *InfluxDB* était disponible sur [DockerHub](https://hub.docker.com/). Voici le `Dockerfile` du conteneur *InfluxPro*:
 
-```
+```Dockerfile
 FROM influxdb
 
 ENV DOCKER_INFLUXDB_INIT_BUCKET=$DOCKER_INFLUXDB_INIT_BUCKET
