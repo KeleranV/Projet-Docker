@@ -39,7 +39,7 @@ ENTRYPOINT influx setup -b DOCKER_INFLUXDB_INIT_BUCKET -o DOCKER_INFLUXDB_INIT_O
 
 Si certaines variables d'environements sont configurées, alors le service pourra se configurer tout seul. On fixe ainsi la variable `DOCKER_INFLUXDB_INIT_MODE` sur `setup` dans le fichier `docker-compose.yml`.
 
-```
+```yml
 version: "3.9"
 
 services:
@@ -111,7 +111,7 @@ Ici l'idée est de mettre en évidence la disponibilité applicative en utilisan
 
 Pour la création des conteneurs un docker-compse.yml sera réalisé à la racine.
 
-```
+```yml
 services:
   reverseproxy:
     build:
@@ -127,7 +127,7 @@ services:
 On utilise Nginx (documentation: [Nginx](https://hub.docker.com/_/nginx)) pour gérer l’équilibrage de charge sur les conteneurs whoami (documentation: [Whoami](https://hub.docker.com/r/containous/whoami)).
 Pour la configuration du reverse proxy, le fichier de configuration de base de nginx situé dans /etc/nginx/conf.d à été écrasé par `nginx.conf`:
 
-```
+```Dockerfile
 FROM nginx
 
 COPY nginx.conf /etc/nginx/nginx.conf
@@ -211,7 +211,7 @@ Ensuite à l'aide de la commande suivante, on génère les certificats : `certbo
 
 À la racine du projet, on créer un fichier *docker-compose.yml* où l'on déclare les conteneurs *nginx* et *cerbot*.
 
-```
+```yml
 version: "3.9"
 
 services:
@@ -294,7 +294,7 @@ server{
 
 Dans le `Dockerfile` le dossier de stockage sera dans */home/site* en lecture seule.
 
-```
+```Dockerfile
 FROM alpine:latest
 
 RUN apk update
@@ -323,7 +323,7 @@ SYSTEME OVH??? .env et tous.
 
 Au niveau du reverse-proxy seul les ports 8080 pour l'ui traefik et le port 443 pour les requêtes HTTPS sont autorisées.
 
-```
+```yml
 version: '3'
 
 services:
