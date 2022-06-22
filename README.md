@@ -7,7 +7,7 @@ Ce dépot contient les ressources des quatres mini-projets réalisés par Léo V
 - [x] Sujet 1
 - [x] Sujet 2
 - [x] Sujet 3
-- [ ] Sujet 4
+- [x] Sujet 4
 
 ### Ressources Md
 
@@ -22,7 +22,59 @@ Ce dépot contient les ressources des quatres mini-projets réalisés par Léo V
 
 ## 1. VISUALISATION DE DONNEES IOT – FASTAPI / INFLUXDB
 
-Notre idée initiale était de créer deux images, une pour utiliser l'API *pyflux*, et l'autre pour lancer *InfluxDB* et le configurer automatiquement. Mais nous avons remarqué qu'une image *InfluxDB* était disponible sur [DockerHub](https://hub.docker.com/), et que si certaines variables d'environements sont configurées, alors le service pourra se configurer tout seul. On fixe ainsi la variable `DOCKER_INFLUXDB_INIT_MODE` sur `setup` dans le fichier `docker-compose.yml`.
+Notre idée initiale était de créer deux images, une pour utiliser l'API *pyflux*, et l'autre pour lancer *InfluxDB* et le configurer automatiquement. Mais nous avons remarqué qu'une image *InfluxDB* était disponible sur [DockerHub](https://hub.docker.com/). Voici le `Dockerfile` du conteneur *InfluxPro*:
+
+```
+FROM influxdb
+
+ENV DOCKER_INFLUXDB_INIT_BUCKET=$DOCKER_INFLUXDB_INIT_BUCKET
+ENV DOCKER_INFLUXDB_INIT_ORG=$DOCKER_INFLUXDB_INIT_ORG
+ENV DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=$DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
+ENV DOCKER_INFLUXDB_INIT_PASSWORD=$DOCKER_INFLUXDB_INIT_PASSWORD
+ENV DOCKER_INFLUXDB_INIT_USERNAME=$DOCKER_INFLUXDB_INIT_USERNAME
+ENV DOCKER_INFLUXDB_INIT_MODE=setup
+ENTRYPOINT influx setup -b DOCKER_INFLUXDB_INIT_BUCKET -o DOCKER_INFLUXDB_INIT_ORG -t DOCKER_INFLUXDB_INIT_ADMIN_TOKEN -u DOCKER_INFLUXDB_INIT_USERNAME -p DOCKER_INFLUXDB_INIT_PASSWORD
+
+```
+
+Si certaines variables d'environements sont configurées, alors le service pourra se configurer tout seul. On fixe ainsi la variable `DOCKER_INFLUXDB_INIT_MODE` sur `setup` dans le fichier `docker-compose.yml`.
+
+```
+version: "3.9"
+
+services:
+  pyflux:
+    build:
+      context: ./pyflux
+      dockerfile: Dockerfile
+    hostname: pyflux
+    environment:
+      - DOCKER_INFLUXDB_INIT_URL=${DOCKER_INFLUXDB_INIT_URL}
+      - DOCKER_INFLUXDB_INIT_ORG=${DOCKER_INFLUXDB_INIT_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${DOCKER_INFLUXDB_INIT_BUCKET}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
+    networks:
+      - front
+      - back
+    ports:
+      - "3000:3000"
+  influxpro:
+    image: influxdb
+    hostname: influxpro
+    environment:
+      - DOCKER_INFLUXDB_INIT_ORG=${DOCKER_INFLUXDB_INIT_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${DOCKER_INFLUXDB_INIT_BUCKET}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${DOCKER_INFLUXDB_INIT_USERNAME}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${DOCKER_INFLUXDB_INIT_PASSWORD}
+    networks:
+      - back
+
+networks:
+  front:
+  back:
+```
 
 Pour des raisons de sécurité, aucune information confidentielle n'est renseignée dans ce fichier, nous utilisons à la place le fichier `.env` qui est par défaut chargé par docker-compose pour fixer les variables d'environnement.
 
@@ -56,8 +108,32 @@ done
 ## 2. DISPONIBILITE DE SERVICE
 
 Ici l'idée est de mettre en évidence la disponibilité applicative en utilisant le reverse-proxy de Nginx. L’objectif est de créer un conteneur qui sera utilisé en frontal d’un ensemble de conteneurs, situé sur leur réseau propre, qui pourront être mis à l'échelle par Docker.
+
+Pour la création des conteneurs un docker-compse.yml sera réalisé à la racine.
+
+```
+services:
+  reverseproxy:
+    build:
+      context: ./reverseproxy
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+  whoami:
+    image: containous/whoami
+    hostname: whoami
+```
+
 On utilise Nginx (documentation: [Nginx](https://hub.docker.com/_/nginx)) pour gérer l’équilibrage de charge sur les conteneurs whoami (documentation: [Whoami](https://hub.docker.com/r/containous/whoami)).
 Pour la configuration du reverse proxy, le fichier de configuration de base de nginx situé dans /etc/nginx/conf.d à été écrasé par `nginx.conf`:
+
+```
+FROM nginx
+
+COPY nginx.conf /etc/nginx/nginx.conf
+```
+
+Fichier `nginx.conf`:
 
 ```bash
 event{}
@@ -135,7 +211,7 @@ Ensuite à l'aide de la commande suivante, on génère les certificats : `certbo
 
 À la racine du projet, on créer un fichier *docker-compose.yml* où l'on déclare les conteneurs *nginx* et *cerbot*.
 
-```yml
+```
 version: "3.9"
 
 services:
@@ -150,18 +226,12 @@ services:
     image: nginx
     hostname: nginx
     volumes:
-      - ./site.conf:/etc/nginx/conf.d/site.conf
+      - ./nginx/site.conf:/etc/nginx/conf.d/site.conf
       - ./nginx/site/html5up-story:/home/site:ro
       - certs:/etc/letsencrypt:ro
-    networks:
-      - front
-      - back
     ports:
       - "80:80"
       - "443:443"
-networks:
-  front:
-  back:
 
 volumes:
   certs:
@@ -206,5 +276,115 @@ Après requête à l'adresse `https://www.projet.keleranv.ovh`, le site s'affich
 
 ## 4. HEBERGEMENT WEB (VERSION TRAEFIK)
 
-ENLEVER LES NETWORKS!!
-SITE.CONF MAL MIS??? MODIFIER DOCKERCOMPOSE.YML???
+L'objectif de ce 4 ième mini projet est de créer un service Docker permettant l’hébergement d’un site web avec Nginx.
+Le site ne sera pas présenté frontalement, mais sera accessible à travers un service de proxy Traefik. Un certificat électronique sera automatiquement généré en utilisant l’API de l’hébergeur OVH.
+
+### Arborescence de travail
+
+Dans un dossier *Nginx* (support de notre conteneur web) nous insérons un fichier de configuration du service `Dockerfile`, ainsi qu’un fichier  `site.conf` dans un dossier `site`, prévu pour stocker l’arborescence du site web.
+
+```
+server{
+	listen 80;
+	location / {
+		root /home/site;
+		}
+}
+```
+
+Dans le `Dockerfile` le dossier de stockage sera dans */home/site* en lecture seule.
+
+```
+FROM alpine:latest
+
+RUN apk update
+RUN apk add nginx
+RUN apk add openrc
+
+RUN openrc
+RUN touch /run/openrc/softlevel
+
+RUN rc-update add nginx
+
+VOLUME /home/server-9/projets/4/nginx/site /home/site:ro
+
+RUN service nginx start
+
+ENTRYPOINT /bin/sh
+```
+
+### Docker-compose.yml
+
+Le fichier Docker-compose.yml créer deux service :
+-  reverse-proxy : Ce conteneur utilise l'image de traefic (documentation: [Traefik](https://doc.traefik.io/traefik/)) qui reçoit les demandes au nom du système et trouve quel service est responsable de traiter la requête. Ici nous n'avons créé qu'un seul service, le service web nginx.
+-  nginx : Ce conteneur correspond à notre serveur web avec la configuration vu précédement.
+
+SYSTEME OVH??? .env et tous.
+
+Au niveau du reverse-proxy seul les ports 8080 pour l'ui traefik et le port 443 pour les requêtes HTTPS sont autorisées.
+
+```
+version: '3'
+
+services:
+  reverse-proxy:
+    # The official v2 Traefik docker image
+    image: traefik:v2.7
+    # Enables the web UI and tells Traefik to listen to docker
+    command: 
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+        #- "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=ovh"
+      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.email=l.vansimay@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      # The HTTP port
+      #- "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+      # The HTTPS port
+      - "443:443"
+
+    environment:
+      - OVH_ENDPOINT=${DNS_OVH_ENDPOINT}
+      - OVH_APPLICATION_KEY=${DNS_OVH_APPLICATION_KEY}
+      - OVH_APPLICATION_SECRET=${DNS_OVH_APPLICATION_SECRET}
+      - OVH_CONSUMER_KEY=${DNS_OVH_CONSUMER_KEY}
+
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./letsencrypt:/letsencrypt
+   nginx:
+    image: nginx
+    hostname: nginx
+    volumes:
+      - ./nginx/site.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/site/html5up-story:/home/site:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.rule=Host(`www.projet.keleranv.ovh`)"
+      - "traefik.http.routers.nginx.entrypoints=websecure"
+      - "traefik.http.routers.nginx.tls.certresolver=myresolver"
+```
+
+### Résultat
+
+On observe bien les ports d'écoute 8080 & 443 du conteneur nginx.
+
+![affichage ports](./images/ps_mini_proj_4.png)
+
+Après requête à l'adresse `https://www.projet.keleranv.ovh`, le site s'affiche.
+
+![démo_Nginx](./images/curl_nginx_prox_4.png)
+
+![démo_Nginx](./images/test_mini_proj_4.png)
+
+
+
