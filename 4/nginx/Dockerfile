@@ -9,7 +9,7 @@ RUN touch /run/openrc/softlevel
 
 RUN rc-update add nginx
 
-VOLUME /home/server-9/projets/3/nginx/site /home/site:ro
+VOLUME /home/server-9/projets/4/nginx/site /home/site:ro
 
 RUN service nginx start
 

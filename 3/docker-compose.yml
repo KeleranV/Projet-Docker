@@ -12,18 +12,12 @@ services:
     image: nginx
     hostname: nginx
     volumes:
-      - ./site.conf:/etc/nginx/conf.d/site.conf
+      - ./nginx/site.conf:/etc/nginx/conf.d/site.conf
       - ./nginx/site/html5up-story:/home/site:ro
       - certs:/etc/letsencrypt:ro
-    networks:
-      - front
-      - back
     ports:
       - "80:80"
       - "443:443"
-networks:
-  front:
-  back:
 
 volumes:
   certs:
