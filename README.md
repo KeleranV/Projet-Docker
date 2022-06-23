@@ -27,7 +27,7 @@ ENTRYPOINT influx setup -b DOCKER_INFLUXDB_INIT_BUCKET -o DOCKER_INFLUXDB_INIT_O
 ```
 
 Si certaines variables d'environements sont configurées, alors le service pourra se configurer tout seul. On fixe ainsi la variable `DOCKER_INFLUXDB_INIT_MODE` sur `setup` dans le fichier `docker-compose.yml`.
-On a bien un mappage du port 3000 coté host et 3000 coté API. L'API et l'InfluxDB comunique via le réseau *back*.
+On a bien un mappage du port 3000 coté host et 3000 coté API. L'API et l'InfluxDB comuniquent via le réseau *back*.
 
 ```yml
 version: "3.9"
