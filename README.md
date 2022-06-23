@@ -2,17 +2,6 @@
 
 Ce dépot contient les ressources des quatres mini-projets réalisés par Léo VANSIMAY et Gaël LECONTE dans le cadre du cours **Architecture Cloud et Méthodes DevOps, outils pour le Cloud-Gaming** pour le trimestre d'été 2022 à l'UQAC.
 
-## TODO List
-
-- [x] Sujet 1
-- [x] Sujet 2
-- [x] Sujet 3
-- [x] Sujet 4
-
-### Ressources Md
-
-- [Cheatsheet](https://www.markdownguide.org/cheat-sheet/)
-
 ## Table des matières
 
 1. [VISUALISATION DE DONNEES IOT – FASTAPI / INFLUXDB](#1-visualisation-de-donnees-iot-–-fastapi--influxdb)
@@ -283,12 +272,12 @@ Le site ne sera pas présenté frontalement, mais sera accessible à travers un 
 
 Dans un dossier *Nginx* (support de notre conteneur web) nous insérons un fichier de configuration du service `Dockerfile`, ainsi qu’un fichier  `site.conf` dans un dossier `site`, prévu pour stocker l’arborescence du site web.
 
-```
+```bash
 server{
-	listen 80;
-	location / {
-		root /home/site;
-		}
+ listen 80;
+ location / {
+  root /home/site;
+  }
 }
 ```
 
@@ -316,10 +305,17 @@ ENTRYPOINT /bin/sh
 ### Docker-compose.yml
 
 Le fichier Docker-compose.yml créer deux service :
--  reverse-proxy : Ce conteneur utilise l'image de traefic (documentation: [Traefik](https://doc.traefik.io/traefik/)) qui reçoit les demandes au nom du système et trouve quel service est responsable de traiter la requête. Ici nous n'avons créé qu'un seul service, le service web nginx.
--  nginx : Ce conteneur correspond à notre serveur web avec la configuration vu précédement.
 
-SYSTEME OVH??? .env et tous.
+- reverse-proxy : Ce conteneur utilise l'image de traefic (documentation: [Traefik](https://doc.traefik.io/traefik/)) qui reçoit les demandes au nom du système et trouve quel service est responsable de traiter la requête. Ici nous n'avons créé qu'un seul service, le service web nginx.
+- nginx : Ce conteneur correspond à notre serveur web avec une configuration très basique, il écoute sur son port 80 et met à disposition le site web.
+
+### Génération du certificat avec l'API OVH
+
+Pour générer un certificat pour Traefik, on utilise ses options permettant l'accès à l'API d'OVH, une fois un token d'API généré, on renseigne ce token dans le `.env` afin qu'il soit chargé par `docker-compose`.
+
+#### Fonctionnement de l'API OVH
+
+À l'aide du token généré, Traefik va générer un challenge, et stocker la réponse dans une entrée TXT du domaine DNS `keleranv.ovh`, et si les serveurs de certification sont capables de retrouver la réponse dans les entrées DNS, alors le certificat est généré.
 
 Au niveau du reverse-proxy seul les ports 8080 pour l'ui traefik et le port 443 pour les requêtes HTTPS sont autorisées.
 
@@ -376,7 +372,7 @@ services:
 
 ### Résultat
 
-On observe bien les ports d'écoute 8080 & 443 du conteneur nginx.
+On observe bien les ports d'écoute 8080 & 443 du conteneur Traefik.
 
 ![affichage ports](./images/ps_mini_proj_4.png)
 
@@ -385,6 +381,3 @@ Après requête à l'adresse `https://www.projet.keleranv.ovh`, le site s'affich
 ![démo_Nginx](./images/curl_nginx_prox_4.png)
 
 ![démo_Nginx](./images/test_mini_proj_4.png)
-
-
-
