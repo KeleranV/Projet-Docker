@@ -27,6 +27,7 @@ ENTRYPOINT influx setup -b DOCKER_INFLUXDB_INIT_BUCKET -o DOCKER_INFLUXDB_INIT_O
 ```
 
 Si certaines variables d'environements sont configurées, alors le service pourra se configurer tout seul. On fixe ainsi la variable `DOCKER_INFLUXDB_INIT_MODE` sur `setup` dans le fichier `docker-compose.yml`.
+On a bien un mappage du port 3000 coté host et 3000 coté API. L'API et l'InfluxDB comunique via le réseau *back*.
 
 ```yml
 version: "3.9"
@@ -43,7 +44,6 @@ services:
       - DOCKER_INFLUXDB_INIT_BUCKET=${DOCKER_INFLUXDB_INIT_BUCKET}
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
     networks:
-      - front
       - back
     ports:
       - "3000:3000"
@@ -61,7 +61,6 @@ services:
       - back
 
 networks:
-  front:
   back:
 ```
 
@@ -281,7 +280,7 @@ server{
 }
 ```
 
-Dans le `Dockerfile` le dossier de stockage sera dans */home/site* en lecture seule.
+Dans le `Dockerfile` le dossier de stockage du site sera dans */home/site* en lecture seule.
 
 ```Dockerfile
 FROM alpine:latest
@@ -304,7 +303,7 @@ ENTRYPOINT /bin/sh
 
 ### Docker-compose.yml
 
-Le fichier Docker-compose.yml créer deux service :
+Le fichier Docker-compose.yml créer deux services :
 
 - reverse-proxy : Ce conteneur utilise l'image de traefic (documentation: [Traefik](https://doc.traefik.io/traefik/)) qui reçoit les demandes au nom du système et trouve quel service est responsable de traiter la requête. Ici nous n'avons créé qu'un seul service, le service web nginx.
 - nginx : Ce conteneur correspond à notre serveur web avec une configuration très basique, il écoute sur son port 80 et met à disposition le site web.
@@ -317,7 +316,7 @@ Pour générer un certificat pour Traefik, on utilise ses options permettant l'a
 
 À l'aide du token généré, Traefik va générer un challenge, et stocker la réponse dans une entrée TXT du domaine DNS `keleranv.ovh`, et si les serveurs de certification sont capables de retrouver la réponse dans les entrées DNS, alors le certificat est généré.
 
-Au niveau du reverse-proxy seul les ports 8080 pour l'ui traefik et le port 443 pour les requêtes HTTPS sont autorisées.
+Au niveau du reverse-proxy seul les ports 8080 pour l'UI traefik et le port 443 pour les requêtes HTTPS sont autorisées.
 
 ```yml
 version: '3'
