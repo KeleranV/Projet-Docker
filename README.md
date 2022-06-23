@@ -377,6 +377,8 @@ On observe bien les ports d'écoute 8080 & 443 du conteneur Traefik.
 
 Après requête à l'adresse `https://www.projet.keleranv.ovh`, le site s'affiche avec le certificat.
 
+![démo_Nginx](./images/curl_ik_proj_4.png)
+
 ![démo_Nginx](./images/curl_nginx_prox_4.png)
 
 ![démo_Nginx](./images/test_mini_proj_4.png)
